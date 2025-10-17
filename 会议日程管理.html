@@ -830,16 +830,26 @@
             try {
                 // 清空当前日程表
                 const scheduleBody = document.getElementById('scheduleBody');
+                if (!scheduleBody) {
+                    alert('无法找到日程表容器');
+                    return;
+                }
                 scheduleBody.innerHTML = '';
                 
                 // 恢复开始时间设置
-                if (data.startTime && typeof data.startTime === 'object' && data.startTime.hour !== undefined) {
-                    currentStartTime = data.startTime;
-                    document.getElementById('startTimeInput').value = data.startTime.hour;
+                const startTimeInput = document.getElementById('startTimeInput');
+                if (startTimeInput) {
+                    if (data.startTime && typeof data.startTime === 'object' && data.startTime.hour !== undefined) {
+                        currentStartTime = data.startTime;
+                        startTimeInput.value = data.startTime.hour;
+                    } else {
+                        // 如果没有开始时间，使用默认值
+                        currentStartTime = { hour: 8, minute: 0 };
+                        startTimeInput.value = 8;
+                    }
                 } else {
-                    // 如果没有开始时间，使用默认值
+                    console.warn('无法找到开始时间输入框');
                     currentStartTime = { hour: 8, minute: 0 };
-                    document.getElementById('startTimeInput').value = 8;
                 }
                 
                 // 恢复日程行
@@ -852,17 +862,20 @@
                                 addNewRow();
                                 const newRow = scheduleBody.lastElementChild;
                                 
-                                const timeCell = newRow.querySelector('.time-cell');
-                                const durationInput = newRow.querySelector('.duration-cell');
-                                const titleInput = newRow.querySelector('.title-cell');
-                                const speakerInput = newRow.querySelector('.speaker-cell');
-                                
-                                if (timeCell && item.time) timeCell.textContent = String(item.time);
-                                if (durationInput && item.duration) durationInput.value = String(item.duration);
-                                if (titleInput && item.title) titleInput.value = String(item.title);
-                                if (speakerInput && item.speaker) speakerInput.value = String(item.speaker);
-                                
-                                validRowsCount++;
+                                if (newRow) {
+                                    const timeCell = newRow.querySelector('.time-cell');
+                                    const durationInput = newRow.querySelector('.duration-cell');
+                                    const titleInput = newRow.querySelector('.title-cell');
+                                    const speakerInput = newRow.querySelector('.speaker-cell');
+                                    
+                                    // 安全地设置值，确保每个元素都存在
+                                    if (timeCell) timeCell.textContent = String(item.time || '');
+                                    if (durationInput) durationInput.value = String(item.duration || '');
+                                    if (titleInput) titleInput.value = String(item.title || '');
+                                    if (speakerInput) speakerInput.value = String(item.speaker || '');
+                                    
+                                    validRowsCount++;
+                                }
                             } catch (rowError) {
                                 console.warn(`处理第${index+1}行数据时出错:`, rowError);
                             }
@@ -871,7 +884,11 @@
                     
                     // 重新计算时间确保连续性
                     if (validRowsCount > 0) {
-                        recalculateTimes();
+                        try {
+                            recalculateTimes();
+                        } catch (calcError) {
+                            console.warn('重新计算时间时出错:', calcError);
+                        }
                     }
                     
                     alert(`已加载 ${validRowsCount} 条会议记录${data.timestamp ? ' (' + formatTimestamp(data.timestamp) + ')' : ''}`);
