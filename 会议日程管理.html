@@ -760,18 +760,56 @@
             reader.onload = function(event) {
                 try {
                     // 解析JSON文件
-                    const data = JSON.parse(event.target.result);
+                    const fileContent = event.target.result;
+                    const data = JSON.parse(fileContent);
                     
-                    // 验证数据格式
-                    if (!data.schedule || !Array.isArray(data.schedule)) {
-                        alert('JSON文件格式不正确，无法加载日程');
+                    // 详细验证数据格式
+                    let validationErrors = [];
+                    
+                    if (!data) {
+                        validationErrors.push('文件内容为空或不是有效的JSON对象');
+                    }
+                    
+                    if (!data.schedule) {
+                        validationErrors.push('缺少必要的schedule字段');
+                    } else if (!Array.isArray(data.schedule)) {
+                        validationErrors.push('schedule字段必须是数组格式');
+                    } else if (data.schedule.length === 0) {
+                        validationErrors.push('schedule数组不能为空');
+                    } else {
+                        // 验证数组中的每个元素
+                        for (let i = 0; i < data.schedule.length; i++) {
+                            const item = data.schedule[i];
+                            if (typeof item !== 'object') {
+                                validationErrors.push(`schedule数组第${i+1}项必须是对象格式`);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (validationErrors.length > 0) {
+                        alert('JSON文件格式验证失败:\n' + validationErrors.join('\n'));
                         return;
                     }
                     
                     // 加载日程数据
                     loadScheduleFromHistory(data);
                 } catch (error) {
-                    alert('文件解析失败，请检查JSON格式');
+                    // 提供更详细的错误信息
+                    let errorMessage = '文件解析失败，请检查JSON格式';
+                    
+                    if (error instanceof SyntaxError) {
+                        errorMessage += '\n\n语法错误: ' + error.message;
+                        
+                        // 尝试获取错误位置附近的文本
+                        if (error.lineNumber && error.columnNumber) {
+                            errorMessage += `\n错误位置: 第${error.lineNumber}行，第${error.columnNumber}列`;
+                        }
+                    } else {
+                        errorMessage += '\n\n' + error.message;
+                    }
+                    
+                    alert(errorMessage);
                     console.error('文件解析错误:', error);
                 }
             };
@@ -789,38 +827,66 @@
         
         // 从历史记录加载日程
         function loadScheduleFromHistory(data) {
-            // 清空当前日程表
-            const scheduleBody = document.getElementById('scheduleBody');
-            scheduleBody.innerHTML = '';
-            
-            // 恢复开始时间设置
-            if (data.startTime) {
-                currentStartTime = data.startTime;
-                document.getElementById('startTimeInput').value = data.startTime.hour;
-            }
-            
-            // 恢复日程行
-            if (data.schedule && Array.isArray(data.schedule)) {
-                data.schedule.forEach(item => {
-                    addNewRow();
-                    const newRow = scheduleBody.lastElementChild;
-                    
-                    const timeCell = newRow.querySelector('.time-cell');
-                    const durationInput = newRow.querySelector('.duration-cell');
-                    const titleInput = newRow.querySelector('.title-cell');
-                    const speakerInput = newRow.querySelector('.speaker-cell');
-                    
-                    if (timeCell) timeCell.textContent = item.time || '';
-                    if (durationInput) durationInput.value = item.duration || '';
-                    if (titleInput) titleInput.value = item.title || '';
-                    if (speakerInput) speakerInput.value = item.speaker || '';
-                });
+            try {
+                // 清空当前日程表
+                const scheduleBody = document.getElementById('scheduleBody');
+                scheduleBody.innerHTML = '';
                 
-                // 重新计算时间确保连续性
-                recalculateTimes();
+                // 恢复开始时间设置
+                if (data.startTime && typeof data.startTime === 'object' && data.startTime.hour !== undefined) {
+                    currentStartTime = data.startTime;
+                    document.getElementById('startTimeInput').value = data.startTime.hour;
+                } else {
+                    // 如果没有开始时间，使用默认值
+                    currentStartTime = { hour: 8, minute: 0 };
+                    document.getElementById('startTimeInput').value = 8;
+                }
+                
+                // 恢复日程行
+                if (data.schedule && Array.isArray(data.schedule) && data.schedule.length > 0) {
+                    let validRowsCount = 0;
+                    
+                    data.schedule.forEach((item, index) => {
+                        if (typeof item === 'object' && item !== null) {
+                            try {
+                                addNewRow();
+                                const newRow = scheduleBody.lastElementChild;
+                                
+                                const timeCell = newRow.querySelector('.time-cell');
+                                const durationInput = newRow.querySelector('.duration-cell');
+                                const titleInput = newRow.querySelector('.title-cell');
+                                const speakerInput = newRow.querySelector('.speaker-cell');
+                                
+                                if (timeCell && item.time) timeCell.textContent = String(item.time);
+                                if (durationInput && item.duration) durationInput.value = String(item.duration);
+                                if (titleInput && item.title) titleInput.value = String(item.title);
+                                if (speakerInput && item.speaker) speakerInput.value = String(item.speaker);
+                                
+                                validRowsCount++;
+                            } catch (rowError) {
+                                console.warn(`处理第${index+1}行数据时出错:`, rowError);
+                            }
+                        }
+                    });
+                    
+                    // 重新计算时间确保连续性
+                    if (validRowsCount > 0) {
+                        recalculateTimes();
+                    }
+                    
+                    alert(`已加载 ${validRowsCount} 条会议记录${data.timestamp ? ' (' + formatTimestamp(data.timestamp) + ')' : ''}`);
+                } else {
+                    // 如果没有有效数据，显示提示
+                    const emptyRow = document.createElement('tr');
+                    emptyRow.className = 'empty-message';
+                    emptyRow.innerHTML = '<td colspan="4" style="text-align:center; color: #999;">暂无会议记录</td>';
+                    scheduleBody.appendChild(emptyRow);
+                    alert('文件中没有找到有效会议记录');
+                }
+            } catch (error) {
+                console.error('加载日程数据时出错:', error);
+                alert('加载日程失败: ' + error.message);
             }
-            
-            alert(`已加载 ${formatTimestamp(data.timestamp)} 的会议记录`);
         }
     </script>
 </body>
