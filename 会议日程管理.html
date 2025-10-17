@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会议日程管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        .header-controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .header-controls input {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+            width: 200px;
+        }
+        
+        .header-controls button {
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .header-controls button:hover {
+            background-color: #2980b9;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .input-cell {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .duration-cell {
+            width: 120px;
+        }
+        
+        .title-cell {
+            width: 100%;
+        }
+        
+        .speaker-cell {
+            width: 200px;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background-color 0.3s;
+        }
+        
+        .add-btn {
+            background-color: #27ae60;
+            color: white;
+        }
+        
+        .add-btn:hover {
+            background-color: #229954;
+        }
+        
+        .remove-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .remove-btn:hover {
+            background-color: #c0392b;
+        }
+        
+        .save-btn {
+            background-color: #9b59b6;
+            color: white;
+        }
+        
+        .save-btn:hover {
+            background-color: #8e44ad;
+        }
+        
+        .autocomplete {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        .autocomplete-items {
+            position: absolute;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            z-index: 99;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: white;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .autocomplete-items div {
+            padding: 10px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .autocomplete-items div:hover {
+            background-color: #f1f1f1;
+        }
+        
+        .time-cell {
+            font-weight: 500;
+            color: #e67e22;
+        }
+        
+        .export-controls {
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .export-btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #16a085;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .export-btn:hover {
+            background-color: #149174;
+        }
+        
+        .history-controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .history-btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .history-btn:hover {
+            background-color: #8e44ad;
+        }
+        
+        .history-btn:active {
+            background-color: #9b59b6;
+        }
+        
+
+        
+        .empty-message {
+            text-align: center;
+            color: #7f8c8d;
+            padding: 30px;
+            font-style: italic;
+        }
+        
+        @media print {
+            body {
+                background-color: white;
+            }
+            
+            .header-controls,
+            .actions,
+            .export-controls {
+                display: none;
+            }
+            
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+            
+            table {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>会议日程管理</h1>
+        
+        <div class="header-controls">
+            <input type="number" id="meetingStartTime" placeholder="输入会议开始时间（如：8）" min="0" max="23">
+            <button id="initSchedule">修改起始时间</button>
+            <button id="clearAll" class="remove-btn">清空所有</button>
+        </div>
+        
+        <table id="scheduleTable">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>持续时间(分钟)</th>
+                    <th>会议标题</th>
+                    <th>讲课人员</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleBody">
+                <tr class="empty-message">
+                    <td colspan="5">请先输入会议开始时间并点击初始化日程</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <div class="export-controls">
+        <button id="copyTabSeparated" class="export-btn">复制Tab分隔内容</button>
+        <button id="printSchedule" class="export-btn">打印</button>
+    </div>
+    
+    <div class="history-controls">
+        <button id="saveSchedule" class="history-btn">保存当前日程</button>
+        <button id="loadHistory" class="history-btn">读取往日会议</button>
+    </div>
+    </div>
+
+    <script>
+        // 获取localStorage中保存的讲课人员数据
+        let speakers = JSON.parse(localStorage.getItem('meetingSpeakers') || '[]');
+        let currentStartTime = null;
+        
+        // 修改起始时间
+        document.getElementById('initSchedule').addEventListener('click', function() {
+            const startTimeInput = document.getElementById('meetingStartTime').value;
+            if (!startTimeInput) {
+                alert('请输入会议开始时间');
+                return;
+            }
+            
+            const startHour = parseInt(startTimeInput);
+            if (isNaN(startHour) || startHour < 0 || startHour > 23) {
+                alert('请输入有效的小时数 (0-23)');
+                return;
+            }
+            
+            // 设置当前开始时间为会议开始时间
+            currentStartTime = { hour: startHour, minute: 0 };
+            
+            const scheduleBody = document.getElementById('scheduleBody');
+            
+            // 如果表格为空，则添加第一行
+            if (scheduleBody.children.length === 0 || (scheduleBody.children.length === 1 && scheduleBody.children[0].classList.contains('empty-message'))) {
+                scheduleBody.innerHTML = '';
+                addNewRow();
+            } else {
+                // 否则重新计算所有行的时间
+                recalculateTimes();
+            }
+        });
+        
+        // 清空所有
+        document.getElementById('clearAll').addEventListener('click', function() {
+            if (confirm('确定要清空所有日程吗？')) {
+                document.getElementById('scheduleBody').innerHTML = `
+                    <tr class="empty-message">
+                        <td colspan="5">请先输入会议开始时间并点击初始化日程</td>
+                    </tr>
+                `;
+                currentStartTime = null;
+            }
+        });
+        
+        // 添加新行
+        function addNewRow() {
+            const scheduleBody = document.getElementById('scheduleBody');
+            
+            const tr = document.createElement('tr');
+            
+            // 格式化当前时间
+            const formattedStartTime = formatTime(currentStartTime);
+            
+            tr.innerHTML = `
+                <td class="time-cell">${formattedStartTime}</td>
+                <td>
+                    <input type="number" class="input-cell duration-cell" placeholder="持续分钟数" value="30">
+                </td>
+                <td>
+                    <input type="text" class="input-cell title-cell" placeholder="输入会议标题">
+                </td>
+                <td>
+                    <div class="autocomplete">
+                        <input type="text" class="input-cell speaker-cell" placeholder="输入讲课人员">
+                        <div class="autocomplete-items"></div>
+                    </div>
+                </td>
+                <td class="actions">
+                    <button class="action-btn add-btn">添加下一项</button>
+                    <button class="action-btn remove-btn">删除</button>
+                </td>
+            `;
+            
+            scheduleBody.appendChild(tr);
+            
+            // 添加持续时间输入事件和失焦事件
+            const durationInput = tr.querySelector('.duration-cell');
+            durationInput.addEventListener('input', function() {
+                updateEndTime(tr);
+            });
+            
+            // 新行创建后立即计算时间，确保显示完整时间段
+            updateEndTime(tr);
+            
+            // 添加失焦事件，当鼠标焦点移开时重新计算所有行的时间
+            durationInput.addEventListener('blur', function() {
+                // 先更新当前行的结束时间
+                updateEndTime(tr);
+                // 然后从第一行开始重新计算所有行的时间
+                recalculateTimes();
+            });
+            
+            // 添加添加下一项按钮事件
+            const addBtn = tr.querySelector('.add-btn');
+            addBtn.addEventListener('click', function() {
+                // 先更新当前行的结束时间
+                updateEndTime(tr);
+                // 然后添加新行
+                addNewRow();
+            });
+            
+            // 添加删除按钮事件
+            const removeBtn = tr.querySelector('.remove-btn');
+            removeBtn.addEventListener('click', function() {
+                // 如果只有一行，不允许删除
+                if (scheduleBody.children.length <= 1) {
+                    alert('至少保留一行日程');
+                    return;
+                }
+                tr.remove();
+                // 重新计算后续行的时间
+                recalculateTimes();
+            });
+            
+            // 设置讲课人员自动补全
+            const speakerInput = tr.querySelector('.speaker-cell');
+            setupAutocomplete(speakerInput);
+            
+            // 保存讲课人员到localStorage
+            speakerInput.addEventListener('blur', function() {
+                const speakerName = this.value.trim();
+                if (speakerName && !speakers.includes(speakerName)) {
+                    speakers.push(speakerName);
+                    localStorage.setItem('meetingSpeakers', JSON.stringify(speakers));
+                }
+            });
+            
+            // 为所有输入框添加回车键事件监听，按下回车添加下一行
+            function setupEnterKeyEvent(inputElement, saveCallback = null) {
+                inputElement.addEventListener('keypress', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); // 阻止表单提交
+                        // 先更新当前行的结束时间
+                        updateEndTime(tr);
+                        // 然后添加新行
+                        addNewRow();
+                        // 执行保存回调（如果有）
+                        if (saveCallback) {
+                            saveCallback();
+                        }
+                    }
+                });
+            }
+            
+            // 为会议标题输入框添加回车事件
+            const titleInput = tr.querySelector('.title-cell');
+            setupEnterKeyEvent(titleInput);
+            
+            // 为讲课人员输入框添加回车事件
+            setupEnterKeyEvent(speakerInput, function() {
+                const speakerName = speakerInput.value.trim();
+                if (speakerName && !speakers.includes(speakerName)) {
+                    speakers.push(speakerName);
+                    localStorage.setItem('meetingSpeakers', JSON.stringify(speakers));
+                }
+            });
+        }
+        
+        // 更新结束时间
+        function updateEndTime(row) {
+            const durationInput = row.querySelector('.duration-cell');
+            const duration = parseInt(durationInput.value);
+            
+            if (!isNaN(duration) && duration > 0) {
+                // 从时间单元格中获取该行的开始时间
+                const timeCell = row.querySelector('.time-cell');
+                const timeText = timeCell.textContent;
+                const startTimeStr = timeText.includes('-') ? timeText.split('-')[0].trim() : timeText.trim();
+                const startTime = parseTime(startTimeStr);
+                
+                // 计算结束时间
+                const endTime = addMinutesToTime(startTime, duration);
+                
+                // 更新时间显示
+                timeCell.textContent = `${formatTime(startTime)} - ${formatTime(endTime)}`;
+                
+                // 重新计算后续行的时间
+                recalculateTimes(row.nextElementSibling);
+            }
+        }
+        
+        // 重新计算时间
+        function recalculateTimes(startRow = null) {
+            const rows = Array.from(document.getElementById('scheduleBody').children);
+            let calcStartTime = null;
+            
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                
+                // 如果是第一行且有currentStartTime，强制使用currentStartTime作为开始时间，并确保从整点开始
+                if (i === 0 && currentStartTime) {
+                    calcStartTime = { hour: currentStartTime.hour, minute: 0 };
+                } 
+                // 如果是起始行或还没有设置计算开始时间，则从这一行开始计算
+                else if (row === startRow || calcStartTime === null) {
+                    // 从时间单元格中提取开始时间
+                    const timeCell = row.querySelector('.time-cell');
+                    const timeText = timeCell.textContent;
+                    const startTimeStr = timeText.includes('-') ? timeText.split('-')[0].trim() : timeText.trim();
+                    
+                    calcStartTime = parseTime(startTimeStr);
+                }
+                
+                // 更新时间显示
+                const timeCell = row.querySelector('.time-cell');
+                const durationInput = row.querySelector('.duration-cell');
+                const duration = parseInt(durationInput.value) || 30; // 默认30分钟
+                
+                // 保存原始开始时间（不修改）
+                const originalStartTime = { ...calcStartTime };
+                
+                if (!isNaN(duration) && duration > 0) {
+                    const endTime = addMinutesToTime(calcStartTime, duration);
+                    timeCell.textContent = `${formatTime(originalStartTime)} - ${formatTime(endTime)}`;
+                    calcStartTime = endTime;
+                } else {
+                    timeCell.textContent = formatTime(originalStartTime);
+                }
+            }
+            
+            // 不再更新currentStartTime，保持用户设置的起始时间不变
+        }
+        
+        // 格式化时间
+        function formatTime(timeObj) {
+            return `${String(timeObj.hour).padStart(2, '0')}:${String(timeObj.minute).padStart(2, '0')}`;
+        }
+        
+        // 解析时间字符串
+        function parseTime(timeStr) {
+            const [hour, minute] = timeStr.split(':').map(Number);
+            return { hour, minute };
+        }
+        
+        // 添加分钟到时间
+        function addMinutesToTime(timeObj, minutes) {
+            let newHour = timeObj.hour;
+            let newMinute = timeObj.minute + minutes;
+            
+            // 处理分钟进位
+            while (newMinute >= 60) {
+                newMinute -= 60;
+                newHour += 1;
+            }
+            
+            // 处理小时进位（24小时制）
+            newHour = newHour % 24;
+            
+            return { hour: newHour, minute: newMinute };
+        }
+        
+        // 设置自动补全
+        function setupAutocomplete(inputElement) {
+            const autocompleteContainer = inputElement.parentElement;
+            const suggestionsContainer = autocompleteContainer.querySelector('.autocomplete-items');
+            
+            inputElement.addEventListener('input', function() {
+                const value = this.value.trim().toLowerCase();
+                suggestionsContainer.innerHTML = '';
+                
+                if (value.length < 1) {
+                    suggestionsContainer.style.display = 'none';
+                    return;
+                }
+                
+                // 筛选匹配的讲课人员
+                const matches = speakers.filter(speaker => 
+                    speaker.toLowerCase().includes(value)
+                );
+                
+                if (matches.length > 0) {
+                    suggestionsContainer.style.display = 'block';
+                    
+                    // 添加匹配项
+                    matches.forEach(match => {
+                        const div = document.createElement('div');
+                        div.textContent = match;
+                        div.addEventListener('click', function() {
+                            inputElement.value = match;
+                            suggestionsContainer.style.display = 'none';
+                        });
+                        suggestionsContainer.appendChild(div);
+                    });
+                } else {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+            
+            // 点击外部关闭自动补全
+            document.addEventListener('click', function(e) {
+                if (!autocompleteContainer.contains(e.target)) {
+                    suggestionsContainer.style.display = 'none';
+                }
+            });
+        }
+        
+        // 复制Tab分隔内容
+        document.getElementById('copyTabSeparated').addEventListener('click', function() {
+            const rows = Array.from(document.getElementById('scheduleBody').children);
+            
+            // 生成表头（可选）
+            let tabContent = `时间\t持续时间(分钟)\t会议标题\t讲课人员\n`;
+            
+            // 生成数据行，使用Tab分隔
+            rows.forEach(row => {
+                // 跳过空消息行
+                if (row.classList.contains('empty-message')) {
+                    return;
+                }
+                
+                const timeCell = row.querySelector('.time-cell');
+                const durationInput = row.querySelector('.duration-cell');
+                const titleInput = row.querySelector('.title-cell');
+                const speakerInput = row.querySelector('.speaker-cell');
+                
+                const time = timeCell.textContent || '';
+                const duration = durationInput.value || '';
+                const title = titleInput.value || '';
+                const speaker = speakerInput.value || '';
+                
+                // 添加Tab分隔的数据行
+                tabContent += `${time}\t${duration}\t${title}\t${speaker}\n`;
+            });
+            
+            // 复制到剪贴板
+            navigator.clipboard.writeText(tabContent)
+                .then(() => {
+                    alert('内容已复制到剪贴板，现在可以粘贴到Excel中');
+                })
+                .catch(err => {
+                    console.error('复制失败:', err);
+                    alert('复制失败，请手动复制');
+                });
+        });
+        
+        // 打印日程
+        document.getElementById('printSchedule').addEventListener('click', function() {
+            window.print();
+        });
+        
+        // 生成时间戳（年月日时分格式）
+        function generateTimestamp() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            return `${year}${month}${day}${hour}${minute}`;
+        }
+        
+        // 格式化时间戳为可读日期时间
+        function formatTimestamp(timestamp) {
+            if (timestamp.length !== 12) return timestamp;
+            
+            const year = timestamp.substring(0, 4);
+            const month = timestamp.substring(4, 6);
+            const day = timestamp.substring(6, 8);
+            const hour = timestamp.substring(8, 10);
+            const minute = timestamp.substring(10, 12);
+            
+            return `${year}-${month}-${day} ${hour}:${minute}`;
+        }
+        
+        // 保存当前日程为本地JSON文件
+        document.getElementById('saveSchedule').addEventListener('click', function() {
+            const rows = Array.from(document.getElementById('scheduleBody').children);
+            const scheduleData = [];
+            
+            // 收集所有日程行数据
+            rows.forEach(row => {
+                // 跳过空消息行
+                if (row.classList.contains('empty-message')) {
+                    return;
+                }
+                
+                const timeCell = row.querySelector('.time-cell');
+                const durationInput = row.querySelector('.duration-cell');
+                const titleInput = row.querySelector('.title-cell');
+                const speakerInput = row.querySelector('.speaker-cell');
+                
+                // 确保获取到所有元素
+                if (timeCell && durationInput && titleInput && speakerInput) {
+                    scheduleData.push({
+                        time: timeCell.textContent || '',
+                        duration: durationInput.value || '',
+                        title: titleInput.value || '',
+                        speaker: speakerInput.value || ''
+                    });
+                }
+            });
+            
+            // 如果没有有效的日程数据，不保存
+            if (scheduleData.length === 0) {
+                alert('没有可保存的日程数据');
+                return;
+            }
+            
+            // 生成时间戳作为文件名
+            const timestamp = generateTimestamp();
+            
+            // 创建完整的日程数据对象，包含创建时间和开始时间设置
+            const fullData = {
+                timestamp: timestamp,
+                createdAt: new Date().toISOString(),
+                startTime: currentStartTime,
+                schedule: scheduleData
+            };
+            
+            // 将数据转换为JSON字符串
+            const jsonStr = JSON.stringify(fullData, null, 2);
+            
+            // 创建Blob对象
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            
+            // 创建下载链接
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${timestamp}_会议日程.json`;
+            document.body.appendChild(a);
+            
+            // 触发下载
+            a.click();
+            
+            // 清理
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert(`日程已保存为文件：${timestamp}_会议日程.json`);
+        });
+        
+        // 添加文件选择输入元素（隐藏）
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.json';
+        fileInput.style.display = 'none';
+        document.body.appendChild(fileInput);
+        
+        // 查看往日会议 - 打开文件选择器
+        document.getElementById('loadHistory').addEventListener('click', function() {
+            fileInput.click();
+        });
+        
+        // 处理文件选择事件
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            // 检查文件扩展名
+            if (!file.name.endsWith('.json')) {
+                alert('请选择JSON格式的文件');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+                try {
+                    // 解析JSON文件
+                    const data = JSON.parse(event.target.result);
+                    
+                    // 验证数据格式
+                    if (!data.schedule || !Array.isArray(data.schedule)) {
+                        alert('JSON文件格式不正确，无法加载日程');
+                        return;
+                    }
+                    
+                    // 加载日程数据
+                    loadScheduleFromHistory(data);
+                } catch (error) {
+                    alert('文件解析失败，请检查JSON格式');
+                    console.error('文件解析错误:', error);
+                }
+            };
+            
+            reader.onerror = function() {
+                alert('文件读取失败');
+            };
+            
+            // 读取文件内容
+            reader.readAsText(file);
+            
+            // 重置文件输入，允许重复选择同一个文件
+            fileInput.value = '';
+        });
+        
+        // 从历史记录加载日程
+        function loadScheduleFromHistory(data) {
+            // 清空当前日程表
+            const scheduleBody = document.getElementById('scheduleBody');
+            scheduleBody.innerHTML = '';
+            
+            // 恢复开始时间设置
+            if (data.startTime) {
+                currentStartTime = data.startTime;
+                document.getElementById('startTimeInput').value = data.startTime.hour;
+            }
+            
+            // 恢复日程行
+            if (data.schedule && Array.isArray(data.schedule)) {
+                data.schedule.forEach(item => {
+                    addNewRow();
+                    const newRow = scheduleBody.lastElementChild;
+                    
+                    const timeCell = newRow.querySelector('.time-cell');
+                    const durationInput = newRow.querySelector('.duration-cell');
+                    const titleInput = newRow.querySelector('.title-cell');
+                    const speakerInput = newRow.querySelector('.speaker-cell');
+                    
+                    if (timeCell) timeCell.textContent = item.time || '';
+                    if (durationInput) durationInput.value = item.duration || '';
+                    if (titleInput) titleInput.value = item.title || '';
+                    if (speakerInput) speakerInput.value = item.speaker || '';
+                });
+                
+                // 重新计算时间确保连续性
+                recalculateTimes();
+            }
+            
+            alert(`已加载 ${formatTimestamp(data.timestamp)} 的会议记录`);
+        }
+    </script>
+</body>
+</html>
