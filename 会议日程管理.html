@@ -14,24 +14,31 @@
         body {
             font-family: 'Microsoft YaHei', Arial, sans-serif;
             line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
-            padding: 20px;
+            color: #e0e0e0;
+            background-color: #2d3436;
+            padding: 0;
+            margin: 0;
+            min-height: 100vh;
+            width: 100vw;
+            overflow-x: hidden;
         }
         
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            min-height: 100vh;
+            background-color: #34495e;
+            padding: 20px;
+            border: 1px solid #2c3e50;
+            box-sizing: border-box;
         }
         
         h1 {
             text-align: center;
-            color: #2c3e50;
+            color: #ecf0f1;
             margin-bottom: 30px;
+            font-weight: 300;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         }
         
         .header-controls {
@@ -43,56 +50,178 @@
         }
         
         .header-controls input {
-            padding: 10px 15px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px 15px;
+            border: 1px solid #4a6741;
+            border-radius: 6px;
             font-size: 16px;
             width: 200px;
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            transition: all 0.3s ease;
         }
         
-        .header-controls button {
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
+        .header-controls input:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+        
+        .header-controls button,
+        .action-btn,
+        .export-btn,
+        .history-btn {
+            padding: 12px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 16px;
-            transition: background-color 0.3s;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header-controls button:hover,
+        .action-btn:hover,
+        .export-btn:hover,
+        .history-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .header-controls button:active,
+        .action-btn:active,
+        .export-btn:active,
+        .history-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* 主按钮样式 */
+        .header-controls button {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
         }
         
         .header-controls button:hover {
-            background-color: #2980b9;
+            background: linear-gradient(135deg, #2980b9, #1f6da3);
         }
         
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            background-color: #2a373f;
+            border-radius: 8px;
+            overflow: hidden;
+            table-layout: fixed;
         }
         
-        th, td {
-            padding: 12px;
+        /* 调整各列宽度和对齐方式 */
+        th:nth-child(1), td:nth-child(1) { /* 开始时间 */
+            width: 120px;
+            padding-left: 20px !important;
+        }
+        
+        th:nth-child(2), td:nth-child(2) { /* 持续时间 */
+            width: 100px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            padding-left: 0 !important;
+        }
+        
+        th:nth-child(3), td:nth-child(3) { /* 会议标题 */
+            width: 40%;
+            text-align: left;
+            padding-left: 0 !important;
+        }
+        
+        th:nth-child(4), td:nth-child(4) { /* 讲课人员 */
+            width: 250px;
+            text-align: center;
+            padding-right: 0 !important;
+            padding-left: 0 !important;
+        }
+        
+        th:nth-child(5), td:nth-child(5) { /* 操作 */
+            width: 100px;
+            text-align: right;
+            padding-right: 30px !important;
+            padding-left: 0 !important;
         }
         
         th {
-            background-color: #f8f9fa;
+            padding: 0;
+            text-align: left;
+            border-bottom: 1px solid #34495e;
+            box-sizing: border-box;
+            border-right: 1px solid transparent;
+            border-left: 1px solid transparent;
+            height: 50px;
+            line-height: 50px;
+        }
+        
+        td {
+            padding: 0;
+            text-align: left;
+            border-bottom: 1px solid #34495e;
+            box-sizing: border-box;
+            border-right: 1px solid transparent;
+            border-left: 1px solid transparent;
+            height: 50px;
+            display: table-cell;
+            vertical-align: middle;
+        }
+        
+        /* 确保所有输入框与单元格边缘对齐 */
+        .input-cell {
+            box-sizing: border-box;
+            border: 1px solid #4a6741;
+            outline: none;
+            transition: all 0.3s ease;
+            width: 100%;
+            height: 100%;
+            display: block;
+            padding: 8px;
+        }
+        
+        /* 统一表格单元格的高度 */
+        tr {
+            height: 50px;
+        }
+        
+        th {
+            background-color: #1e2a33;
             font-weight: 600;
-            color: #2c3e50;
+            color: #ecf0f1;
+            text-transform: uppercase;
+            font-size: 14px;
+            letter-spacing: 0.5px;
         }
         
         tr:hover {
-            background-color: #f8f9fa;
+            background-color: #304254;
         }
         
         .input-cell {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
+            height: 40px;
+            padding: 0 8px;
+            border: 1px solid #4a6741;
             border-radius: 4px;
             font-size: 14px;
+            background-color: #1a252f;
+            color: #ecf0f1;
+            transition: all 0.3s ease;
+            line-height: 40px;
+            vertical-align: middle;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+        
+        .input-cell:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
         }
         
         .duration-cell {
@@ -101,6 +230,13 @@
         
         .title-cell {
             width: 100%;
+            padding-left: 10px !important;
+        }
+        
+        /* 为讲课人员列的输入框添加右对齐样式 */
+        .speaker-cell {
+            text-align: right;
+            padding-right: 20px !important;
         }
         
         .speaker-cell {
@@ -109,16 +245,27 @@
         
         .actions {
             display: flex;
-            gap: 5px;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 10px;
+            height: 50px;
+            padding: 10px 30px 10px 0;
+            box-sizing: border-box;
+            width: 100%;
+            margin-left: auto;
         }
         
         .action-btn {
-            padding: 5px 10px;
-            border: none;
+            padding: 0;
+            font-size: 20px;
+            font-weight: bold;
             border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: background-color 0.3s;
+            width: 40px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
         
         .add-btn {
@@ -140,12 +287,12 @@
         }
         
         .save-btn {
-            background-color: #9b59b6;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
             color: white;
         }
         
         .save-btn:hover {
-            background-color: #8e44ad;
+            background: linear-gradient(135deg, #8e44ad, #7d3c98);
         }
         
         .autocomplete {
@@ -156,31 +303,34 @@
         
         .autocomplete-items {
             position: absolute;
-            border: 1px solid #ddd;
+            border: 1px solid #4a6741;
             border-radius: 4px;
             z-index: 99;
             top: 100%;
             left: 0;
             right: 0;
-            background-color: white;
+            background-color: #1a252f;
             max-height: 150px;
             overflow-y: auto;
             display: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
         
         .autocomplete-items div {
             padding: 10px;
             cursor: pointer;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid #34495e;
+            color: #ecf0f1;
         }
         
         .autocomplete-items div:hover {
-            background-color: #f1f1f1;
+            background-color: #34495e;
         }
         
         .time-cell {
-            font-weight: 500;
-            color: #e67e22;
+            font-weight: 600;
+            color: #f39c12;
+            font-size: 15px;
         }
         
         .export-controls {
@@ -189,19 +339,13 @@
         }
         
         .export-btn {
-            padding: 10px 20px;
-            margin: 0 10px;
-            background-color: #16a085;
+            background: linear-gradient(135deg, #16a085, #149174);
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            margin: 0 10px;
         }
         
         .export-btn:hover {
-            background-color: #149174;
+            background: linear-gradient(135deg, #149174, #117a65);
         }
         
         .history-controls {
@@ -210,37 +354,49 @@
         }
         
         .history-btn {
-            padding: 10px 20px;
-            margin: 0 10px;
-            background-color: #9b59b6;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
             color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            margin: 0 10px;
         }
         
         .history-btn:hover {
-            background-color: #8e44ad;
+            background: linear-gradient(135deg, #e67e22, #d35400);
         }
-        
-        .history-btn:active {
-            background-color: #9b59b6;
-        }
-        
-
         
         .empty-message {
             text-align: center;
-            color: #7f8c8d;
-            padding: 30px;
+            color: #95a5a6;
+            padding: 40px;
             font-style: italic;
+        }
+        
+        /* 添加滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #2c3e50;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #3498db;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2980b9;
         }
         
         @media print {
             body {
                 background-color: white;
+                color: black;
+                width: 100%;
+                margin: 0;
+                padding: 0;
             }
             
             .header-controls,
@@ -251,10 +407,22 @@
             
             .container {
                 box-shadow: none;
+                width: 100%;
                 padding: 0;
+                background-color: white;
             }
             
             table {
+                page-break-inside: avoid;
+                background-color: #2a373f;
+                color: black;
+            }
+            
+            th {
+                background-color: #1e2a33;
+                color: white;
+            }
+            tr {
                 page-break-inside: avoid;
             }
         }
@@ -299,12 +467,27 @@
     </div>
 
     <script>
+        // 添加页面刷新提示
+        window.addEventListener('beforeunload', function(e) {
+            // 检查是否有内容可以保存
+            const scheduleBody = document.getElementById('scheduleBody');
+            if (scheduleBody && scheduleBody.children.length > 0 && 
+                !(scheduleBody.children.length === 1 && scheduleBody.children[0].classList.contains('empty-message'))) {
+                // 标准提示消息
+                const message = '确定要离开吗？未保存的内容将会丢失。';
+                
+                // 兼容不同浏览器
+                e.returnValue = message;
+                return message;
+            }
+        });
+        
         // 获取localStorage中保存的讲课人员数据
         let speakers = JSON.parse(localStorage.getItem('meetingSpeakers') || '[]');
         let currentStartTime = null;
         
-        // 修改起始时间
-        document.getElementById('initSchedule').addEventListener('click', function() {
+        // 修改起始时间函数
+        function modifyStartTime() {
             const startTimeInput = document.getElementById('meetingStartTime').value;
             if (!startTimeInput) {
                 alert('请输入会议开始时间');
@@ -330,7 +513,18 @@
                 // 否则重新计算所有行的时间
                 recalculateTimes();
             }
+        }
+        
+        // 修改起始时间按钮事件
+        document.getElementById('initSchedule').addEventListener('click', modifyStartTime);
+        
+        // 为会议开始时间输入框添加回车事件
+        document.getElementById('meetingStartTime').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                modifyStartTime();
+            }
         });
+
         
         // 清空所有
         document.getElementById('clearAll').addEventListener('click', function() {
@@ -358,18 +552,18 @@
                 <td>
                     <input type="number" class="input-cell duration-cell" placeholder="持续分钟数" value="30">
                 </td>
-                <td>
-                    <input type="text" class="input-cell title-cell" placeholder="输入会议标题">
+                <td class="title-cell">
+                    <input type="text" class="input-cell title-input" placeholder="输入会议标题">
                 </td>
-                <td>
+                <td class="speaker-cell">
                     <div class="autocomplete">
-                        <input type="text" class="input-cell speaker-cell" placeholder="输入讲课人员">
+                        <input type="text" class="input-cell speaker-input" placeholder="输入讲课人员">
                         <div class="autocomplete-items"></div>
                     </div>
                 </td>
                 <td class="actions">
-                    <button class="action-btn add-btn">添加下一项</button>
-                    <button class="action-btn remove-btn">删除</button>
+                    <button class="action-btn add-btn" title="添加下一项">+</button>
+                    <button class="action-btn remove-btn" title="删除">-</button>
                 </td>
             `;
             
@@ -415,7 +609,7 @@
             });
             
             // 设置讲课人员自动补全
-            const speakerInput = tr.querySelector('.speaker-cell');
+            const speakerInput = tr.querySelector('.speaker-input');
             setupAutocomplete(speakerInput);
             
             // 保存讲课人员到localStorage
@@ -445,7 +639,7 @@
             }
             
             // 为会议标题输入框添加回车事件
-            const titleInput = tr.querySelector('.title-cell');
+            const titleInput = tr.querySelector('.title-input');
             setupEnterKeyEvent(titleInput);
             
             // 为讲课人员输入框添加回车事件
@@ -612,8 +806,8 @@
                 
                 const timeCell = row.querySelector('.time-cell');
                 const durationInput = row.querySelector('.duration-cell');
-                const titleInput = row.querySelector('.title-cell');
-                const speakerInput = row.querySelector('.speaker-cell');
+                const titleInput = row.querySelector('.title-input');
+                const speakerInput = row.querySelector('.speaker-input');
                 
                 const time = timeCell.textContent || '';
                 const duration = durationInput.value || '';
@@ -867,14 +1061,19 @@
                                 if (newRow) {
                                     const timeCell = newRow.querySelector('.time-cell');
                                     const durationInput = newRow.querySelector('.duration-cell');
-                                    const titleInput = newRow.querySelector('.title-cell');
-                                    const speakerInput = newRow.querySelector('.speaker-cell');
+                                    const titleInput = newRow.querySelector('.title-input');
+                                    const speakerInput = newRow.querySelector('.speaker-input');
                                     
                                     // 安全地设置值，确保每个元素都存在
                                     if (timeCell) timeCell.textContent = String(item.time || '');
                                     if (durationInput) durationInput.value = String(item.duration || '');
                                     if (titleInput) titleInput.value = String(item.title || '');
                                     if (speakerInput) speakerInput.value = String(item.speaker || '');
+                                    
+                                    // 确保为加载的行设置自动补全
+                                    if (speakerInput) {
+                                        setupAutocomplete(speakerInput);
+                                    }
                                     
                                     validRowsCount++;
                                 }
