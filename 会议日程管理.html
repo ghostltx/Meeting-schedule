@@ -719,7 +719,8 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${timestamp}_会议日程.json`;
+            // 在文件名前添加文件夹标识，方便用户识别
+            a.download = `会议日程_${timestamp}.json`;
             document.body.appendChild(a);
             
             // 触发下载
@@ -729,7 +730,8 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
             
-            alert(`日程已保存为文件：${timestamp}_会议日程.json`);
+            // 添加提示信息，提醒用户保存到指定文件夹
+            alert(`日程已准备下载。\n\n请在弹出的保存对话框中选择或创建"会议日程"文件夹作为保存位置。\n\n建议文件名: 会议日程_${timestamp}.json`);
         });
         
         // 添加文件选择输入元素（隐藏）
